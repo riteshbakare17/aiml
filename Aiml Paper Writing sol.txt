@@ -1,0 +1,567 @@
+Q.1 Find the Shortest Path in an Unweighted Graph from Source to Destination using BFS
+Solution:
+Let’s solve 0 → 6 manually using BFS:
+Step 1: Initialize
+•	Start at node 0
+•	Queue: [0]
+•	Visited: {0}
+•	Parent: {0: None}
+Step 2: Process Node 0
+•	Dequeue 0
+•	Neighbors: 1, 2
+•	Add them to queue & mark visited
+•	Queue: [1, 2]
+•	Visited: {0,1,2}
+•	Parent: {0:None, 1:0, 2:0}
+Step 3: Process Node 1
+•	Dequeue 1
+•	Neighbors: 0(visited), 3, 4
+•	Add 3, 4
+•	Queue: [2, 3, 4]
+•	Visited: {0,1,2,3,4}
+•	Parent: {..., 3:1, 4:1}
+Step 4: Process Node 2
+•	Dequeue 2
+•	Neighbors: 0(visited), 5
+•	Add 5
+•	Queue: [3, 4, 5]
+•	Visited: {0,1,2,3,4,5}
+•	Parent: {..., 5:2}
+Step 5: Process Node 3
+•	Dequeue 3
+•	Neighbors: 1(visited), 6 ← TARGET!
+•	Add 6, record parent
+•	Queue: [4, 5, 6]
+•	Parent: {..., 6:3}
+Step 6: Reconstruct Path
+•	Start from 6 → parent is 3
+•	3 → parent is 1
+•	1 → parent is 0
+•	0 → parent is None → STOP
+•	Path: 0 ← 1 ← 3 ← 6 → reverse → 0 → 1 → 3 → 6
+✅ Done! Shortest path found in 3 steps
+
+
+
+
+
+
+
+
+
+Q.2 Implement DFS to Explore All Reachable Nodes and Detect Cycles
+Solution:
+Let’s trace Test 2: Graph with edges (0,1), (1,2), (2,3), (3,1) starting at 0.
+We want to:
+•	Explore all reachable nodes
+•	Detect if any cycle exists
+Step-by-Step DFS with Recursion Stack:
+Initial Call: dfs(0)
+•	visited = {}, rec_stack = {}, reachable = {}
+•	Visit 0 → visited={0}, rec_stack={0}, reachable={0}
+From 0 → neighbor 1
+•	Visit 1 → visited={0,1}, rec_stack={0,1}, reachable={0,1}
+From 1 → neighbor 2
+•	Visit 2 → visited={0,1,2}, rec_stack={0,1,2}, reachable={0,1,2}
+From 2 → neighbor 3
+•	Visit 3 → visited={0,1,2,3}, rec_stack={0,1,2,3}, reachable={0,1,2,3}
+From 3 → neighbor 1
+•	1 is already in rec_stack → BACK EDGE DETECTED
+•	Return True (cycle found)
+Unwind recursion:
+•	Remove 3 from rec_stack → rec_stack={0,1,2}
+•	Return True to caller
+•	Remove 2 → rec_stack={0,1}
+•	Return True
+•	Remove 1 → rec_stack={0}
+•	Return True
+•	Remove 0 → rec_stack={}
+•	Final result: reachable = {0,1,2,3}, has_cycle = True
+✅ Cycle successfully detected!
+💡 Key Insight: In DFS, if you encounter a node that’s already in the recursion stack, it means there’s a back edge → cycle!
+
+
+
+
+
+
+
+
+
+
+
+Q.3 Find Least-Cost Path in Weighted Graph using Uniform Cost Search
+Solution:
+Let’s trace UCS from 0 → 4 manually.
+We use a priority queue (min-heap) ordered by cumulative cost.
+Step 0: Initialize
+•	PQ: [(0, 0, [0])]
+•	Visited: {}
+________________________________________
+Step 1: Pop (0, 0, [0])
+•	Expand node 0 → neighbors: 1(cost 4), 2(cost 1)
+•	Push: (4, 1, [0,1]), (1, 2, [0,2])
+•	PQ: [(1,2,[0,2]), (4,1,[0,1])]
+•	Visited: {0}
+________________________________________
+Step 2: Pop (1, 2, [0,2])
+•	Expand node 2 → neighbors: 0(visited), 1(cost 2), 3(cost 5)
+•	Push: (1+2=3, 1, [0,2,1]), (1+5=6, 3, [0,2,3])
+•	PQ: [(3,1,[0,2,1]), (4,1,[0,1]), (6,3,[0,2,3])]
+•	Visited: {0,2}
+________________________________________
+Step 3: Pop (3, 1, [0,2,1])
+•	Expand node 1 → neighbors: 0(visited), 2(visited), 3(cost 1)
+•	Push: (3+1=4, 3, [0,2,1,3])
+•	PQ: [(4,3,[0,2,1,3]), (4,1,[0,1]), (6,3,[0,2,3])]
+•	Visited: {0,2,1}
+________________________________________
+Step 4: Pop (4, 3, [0,2,1,3])
+•	Expand node 3 → neighbors: 1(visited), 2(visited), 4(cost 3)
+•	Push: (4+3=7, 4, [0,2,1,3,4])
+•	PQ: [(4,1,[0,1]), (6,3,[0,2,3]), (7,4,[0,2,1,3,4])]
+•	Visited: {0,2,1,3}
+________________________________________
+Step 5: Pop (4,1,[0,1]) → but 1 already visited → skip
+Step 6: Pop (6,3,[0,2,3]) → 3 already visited → skip
+Step 7: Pop (7,4,[0,2,1,3,4]) → GOAL NODE!
+•	Return cost = 7, path = [0,2,1,3,4]
+✅ Done! Least cost path found.
+💡 Why didn’t we take 0→1→3→4 (cost 8)? Because UCS always expands the cheapest path first — and 0→2→1→3 (cost 4) got expanded before 0→1→3 (cost 5).
+
+
+
+
+
+
+
+
+Q.4 Search for Target Node in Tree using Depth Limited Search (DLS)
+Solution:
+Let’s trace searching for ‘H’ with depth limit = 3 manually using recursive DLS.
+Step 0:
+•	Start at A (depth=0), path=[A]
+Step 1:
+•	Expand A → children: B, C, D
+•	Go to first child: B (depth=1), path=[A,B]
+Step 2:
+•	Expand B → children: E, F
+•	Go to E (depth=2), path=[A,B,E]
+Step 3:
+•	Expand E → child: H
+•	Go to H (depth=3), path=[A,B,E,H]
+Step 4:
+•	Value matches target ‘H’ → ✅ FOUND!
+•	Return path: [A,B,E,H]
+________________________________________
+Now try depth limit = 2:
+Step 0-2: Same → at E (depth=2)
+Step 3:
+•	Try to go to H → but depth would become 3 > limit (2) → ❌ PRUNE
+•	Backtrack → try F → no H under F
+•	Backtrack → try C → not H
+•	Backtrack → try D → not H
+•	❌ Target not found within depth limit.
+💡 Key Insight: DLS prevents going deeper than allowed — even if the target exists beyond the limit, it will not be found.
+
+
+
+
+
+
+
+
+
+Q.5 : Implement Iterative Deepening DFS to Find Goal at Minimum Depth
+Solution:
+Let’s trace searching for ‘J’ manually.
+We run DLS with increasing depth limits:
+________________________________________
+Depth Limit = 0:
+•	Only visit A → not J → ❌ fail
+Depth Limit = 1:
+•	Visit: A → B, C, D → none is J → ❌ fail
+Depth Limit = 2:
+•	Visit: A → B → E,F; A → C; A → D → G → none is J → ❌ fail
+Depth Limit = 3:
+•	Visit up to depth 3: includes H (under E), but J is under I → still not reached → ❌ fail
+Depth Limit = 4:
+•	Now we can reach depth 4: 
+o	A → D → G → I → J ✅ FOUND!
+•	Return path: [A, D, G, I, J], depth = 4
+💡 Even though DFS might have gone deep into left branches first, IDDFS guarantees we find the minimum depth solution by systematically increasing the limit.
+
+
+
+
+
+
+Q.6 Implement A* Search to Find Optimal Path Using Heuristic
+Solution:
+Let’s trace A* from A to G using Euclidean heuristic.
+We maintain:
+•	g(n) = actual cost from start
+•	h(n) = estimated cost to goal (Euclidean distance)
+•	f(n) = g(n) + h(n)
+Step 0: Initialize
+•	Start at A: g=0, h≈8.06 (√(7²+0²)), f≈8.06
+•	Open Set: [(8.06, 0, A, [A])]
+________________________________________
+Step 1: Expand A (lowest f)
+•	Neighbors: B(g=3), C(g=5)
+•	B: h(B→G)=√((7-2)²+(0-1)²)=√26≈5.10 → f=3+5.10=8.10
+•	C: h(C→G)=√((7-1)²+(0-3)²)=√45≈6.71 → f=5+6.71=11.71
+•	Open Set: [(8.10, 3, B, [A,B]), (11.71, 5, C, [A,C])]
+________________________________________
+Step 2: Expand B (f=8.10)
+•	Neighbors: A(visited), D, E
+•	D: g=3+4=7, h(D→G)=√((7-3)²+(0-4)²)=√32≈5.66 → f=12.66
+•	E: g=3+6=9, h(E→G)=√((7-5)²+(0-2)²)=√8≈2.83 → f=11.83
+•	Open Set: [(11.71,C), (11.83,E), (12.66,D)]
+________________________________________
+Step 3: Expand C (f=11.71) → but let’s see if better path through B exists later? Actually, next lowest is E!
+Wait — correction: After expanding B, we have:
+Open Set: [C(11.71), E(11.83), D(12.66)] → so expand C next.
+But after expanding C → D (g=5+2=7), which is same cost as B→D (g=7). So D now has g=7 via C.
+Then we expand E (f=11.83):
+•	E neighbors: B(visited), F, G
+•	G: g=9+5=14, h=0 → f=14 → GOAL!
+But is this optimal? Let’s check if any path can be cheaper.
+Since all edge costs positive and heuristic admissible, first time we pop G, it’s optimal.
+Final path: A→B→E→G, cost=14.
+✅ Done!
+💡 Key Insight: Even though C looked promising, heuristic guided us to explore B→E→G which turned out optimal. The heuristic prevented unnecessary expansion of higher-cost branches.
+
+
+
+
+
+
+
+
+Q.7 Solve N-Queens using Hill Climbing
+Solution:
+Let’s solve 4-Queens manually using Hill Climbing:
+Step 0: Start with random board
+Initial board: [1, 3, 0, 2] → meaning:
+•	Col 0: Queen at row 1
+•	Col 1: Queen at row 3
+•	Col 2: Queen at row 0
+•	Col 3: Queen at row 2
+Visual:
+text
+Row 3:   |   | Q |   |   |
+Row 2:   |   |   |   | Q |
+Row 1:   | Q |   |   |   |
+Row 0:   |   |   | Q |   |
+         C0  C1  C2  C3
+→ Conflicts: Queen at (0,1) attacks (2,3) diagonally → 1 conflict.
+________________________________________
+Step 1: Generate neighbors by moving one queen
+Try moving queen in column 0:
+•	Row 0: Check conflicts → might be better?
+•	Row 2: Check conflicts
+•	Row 3: Check conflicts
+After checking all, suppose moving queen in col 0 to row 2 gives 0 conflicts:
+New board: [2, 3, 0, 2] → wait, now col 0 and col 3 both have queen at row 2 → conflict!
+Actually, let’s compute properly:
+Original: [1,3,0,2] has 1 conflict (queen0 and queen3)
+Try [2,3,0,2] → queens at col0 & col3 both row 2 → 1 conflict (worse or same)
+Try [0,3,0,2] → queens at col0 & col2 both row 0 → 1 conflict
+Try [3,3,0,2] → queens at col0 & col1 both row 3 → 1 conflict
+None better? Then try moving queen in column 1...
+Eventually, you’ll find: [1,3,2,0] → let’s check:
+•	(0,1), (1,3): |1-3|=2, |0-1|=1 → not diagonal
+•	(0,1), (2,2): |1-2|=1, |0-2|=2 → not diagonal
+•	(0,1), (3,0): |1-0|=1, |0-3|=3 → not diagonal
+•	(1,3), (2,2): |3-2|=1, |1-2|=1 → DIAGONAL! Conflict.
+Ah! Let’s try [2,0,3,1]:
+Positions: (0,2), (1,0), (2,3), (3,1)
+Check diagonals:
+•	(0,2) & (1,0): |2-0|=2, |0-1|=1 → no
+•	(0,2) & (2,3): |2-3|=1, |0-2|=2 → no
+•	(0,2) & (3,1): |2-1|=1, |0-3|=3 → no
+•	(1,0) & (2,3): |0-3|=3, |1-2|=1 → no
+•	(1,0) & (3,1): |0-1|=1, |1-3|=2 → no
+•	(2,3) & (3,1): |3-1|=2, |2-3|=1 → no
+✅ No conflicts — SOLUTION FOUND!
+💡 Hill Climbing would have evaluated neighbors and chosen this when it yielded 0 conflicts.
+
+
+
+
+
+
+
+
+
+Q.8 Tic-Tac-Toe using Minimax Algorithm
+Solution:
+Let’s trace Test Case 2 manually:
+Current Board:
+text
+X | X | 
+---------
+O | O | 
+---------
+  |   | 
+It’s AI’s turn (O). If AI doesn’t play (0,2), human will win next turn.
+Minimax Evaluation:
+Option 1: AI plays (0,2)
+•	Board becomes:
+text
+X | X | O
+---------
+O | O | 
+---------
+  |   | 
+•	Game continues → eventually may lead to tie or AI win → score = 0 or positive
+Option 2: AI plays elsewhere, say (1,2)
+•	Board:
+text
+X | X | 
+---------
+O | O | O   ← AI wins immediately! Score = +10 (depth=1 → 10-1=9)
+Wait — actually this is even better! AI wins right away.
+Correction: In this configuration, AI can also win by playing (1,2)!
+So both (0,2) and (1,2) are good — but (1,2) wins immediately → higher score.
+Let’s recalculate properly:
+If AI plays (1,2):
+→ Creates "O O O" in row 1 → AI wins → return score = 10 - 1 = 9
+If AI plays (0,2):
+→ Blocks X, but no immediate win → game continues → eventual score might be 0 (tie) or less
+So BEST MOVE is actually (1,2) — AI should win now rather than just block!
+💡 This reveals a mistake in our “expected” output above — AI should prioritize winning over blocking! Let’s fix the test case.
+
+
+
+
+
+
+
+
+
+
+Q.9 Enhance the Min–Max implementation by incorporating Alpha–Beta Pruning.
+Solution:
+Let’s say we’re evaluating this position (AI to move):
+text
+X | O | X
+---------
+O | O | 
+---------
+X |   | 
+AI ('O') can play at (1,2), (2,1), or (2,2).
+Without pruning:
+Minimax evaluates ALL possible future moves recursively.
+With Alpha-Beta:
+•	Start evaluating move (1,2) 
+o	Suppose it leads to AI win → score = +9
+o	Set α = 9 (best so far for Max)
+•	Now evaluate move (2,1) 
+o	As we explore, suppose we find a path where human can force a win → score ≤ -8
+o	Since β (-8) ≤ α (9) → we prune (stop evaluating) this branch!
+•	Skip unnecessary computation.
+💡 Result: Same optimal move chosen, but much faster!
+
+
+
+
+
+
+
+
+
+Q. 10 Design a Sudoku solver using Constraint Satisfaction techniques
+Solution:
+Let’s solve the top-left corner of the sample:
+Step 1: Look at Cell (0,2) — Row 0, Col 2 (currently 0/empty)
+•	Row 0 has: 5, 3, 7 → so cannot be 5,3,7
+•	Col 2 has: 8 (from row 2), and later 9,6,3,1,7,5 → but we only know 8 so far
+•	Box (0,0 to 2,2) has: 5,3,6,?,?,9,8 → known: 5,3,6,9,8
+→ Possible digits: 1,2,4
+Try 4 → doesn’t conflict → pencil it in.
+Later, if you reach contradiction → backtrack and try 1 or 2.
+Step 2: Move to next empty cell → repeat
+Use “Only Choice” (only one digit fits) and “Single Possibility” rules.
+Eventually fill entire grid by:
+•	Trying valid digits
+•	Backtracking when stuck
+•	Continuing until full
+💡 This is exactly what the code does — automated constraint propagation via backtracking.
+
+
+
+
+
+
+
+
+
+
+Q. 11 BFS State-Space Search
+Solution:
+Starting from:
+text
+1 2 3
+4 0 6
+7 5 8
+Step 1: Move blank (0) UP? → Can’t (already top row in middle)
+→ Move DOWN? → 5 is below → swap 0 and 5:
+text
+1 2 3
+4 5 6
+7 0 8   ← New state
+Step 2: Move blank LEFT? → 7 → swap:
+text
+1 2 3
+4 5 6
+0 7 8   ← Not helpful
+→ Move RIGHT? → 8 → swap:
+text
+1 2 3
+4 5 6
+7 8 0   ← GOAL! ✅
+So optimal path: Down → Right
+💡 This is exactly what BFS finds — shortest path in state space!
+
+
+
+
+
+
+
+
+
+
+
+Q.12 Develop a program to find a path for an agent from a start cell to a goal cell in a maze using BFS, DFS, UCS
+Solution:
+Let’s solve manually from (0,0) to (4,4):
+Step 1: Start at (0,0)
+→ Can go down to (1,0) — right is blocked by wall.
+Step 2: From (1,0) → down to (2,0)
+Step 3: From (2,0) → right to (2,1) → (2,2)
+Step 4: From (2,2) → down to (3,2)
+Step 5: From (3,2) → right to (3,3)
+Step 6: From (3,3) → down to (4,3)
+Step 7: From (4,3) → right to (4,4) ✅ GOAL!
+Total moves: 8
+💡 BFS explores level-by-level → guarantees shortest path.
+DFS might wander into dead ends first.
+UCS behaves like BFS when all step costs are equal.
+
+
+
+
+
+
+
+Q.13 Write a program to implement N queen problem using constraint satisfaction approach.
+Solution:
+Let’s solve 4-Queens manually:
+We place queens row by row, checking constraints.
+Step 1: Place Queen 1 in Row 0
+Try Col 0 → later causes conflict → backtrack
+Try Col 1 → ✅ Seems promising
+text
+Row 0: . Q . .
+Step 2: Place Queen 2 in Row 1
+Col 0? → attacked diagonally by Q at (0,1) ❌
+Col 1? → same column ❌
+Col 2? → attacked diagonally ❌
+Col 3? → ✅ Safe
+text
+Row 0: . Q . .
+Row 1: . . . Q
+Step 3: Place Queen 3 in Row 2
+Col 0? → ✅ Safe (check: not same col/diagonal with above queens)
+text
+Row 0: . Q . .
+Row 1: . . . Q
+Row 2: Q . . .
+Step 4: Place Queen 4 in Row 3
+Col 0? → attacked by Q at (2,0) ❌
+Col 1? → attacked by Q at (0,1) ❌
+Col 2? → ✅ Safe!
+Col 3? → attacked by Q at (1,3) ❌
+text
+Row 0: . Q . .
+Row 1: . . . Q
+Row 2: Q . . .
+Row 3: . . Q .
+✅ All queens placed safely — problem solved!
+💡 This is exactly what the code does — automated backtracking with constraint checks.
+
+
+
+
+
+
+
+
+
+
+
+
+Q.14 Develop a program to solve an optimization problem using a local search
+Solution:
+Let’s solve manually for cities A(0,0), B(1,3), C(4,3), D(6,0)
+Step 1: Start with random tour
+Say: A → C → B → D → A
+Calculate distance:
+•	A→C = √(4²+3²)=5
+•	C→B = 3
+•	B→D = √(5²+3²)=√34≈5.83
+•	D→A = 6
+→ Total ≈ 19.83
+Step 2: Try swapping two cities
+Swap B and C → new tour: A → B → C → D → A
+•	A→B=√10≈3.16
+•	B→C=3
+•	C→D=√(2²+3²)=√13≈3.61
+•	D→A=6
+→ Total ≈ 15.77 ✅ Better!
+Step 3: Try other swaps
+Swap C and D → A → B → D → C → A
+•	A→B=3.16
+•	B→D=√(5²+3²)=√34≈5.83
+•	D→C=√13≈3.61
+•	C→A=5
+→ Total ≈ 17.6 → worse ❌
+No better neighbor → stop. Solution: A→B→C→D→A, cost≈15.77
+💡 This is exactly what Hill Climbing does — iteratively improves by swapping pairs until no better neighbor exists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Q.15 Write a program to implement a water jug problem.
+Solution:
+Start: Both jugs empty → (0, 0)
+Step 1: Fill 4L jug → (4, 0)
+Step 2: Pour 4L → 3L until full → (1, 3)
+(4-3=1 remains in jug1)
+Step 3: Empty 3L jug → (1, 0)
+Step 4: Pour 1L from jug1 → jug2 → (0, 1)
+Step 5: Fill 4L jug again → (4, 1)
+Step 6: Pour from 4L → 3L (which has 1L space) → (2, 3) ✅
+Now jug1 has exactly 2L — GOAL!
+💡 This is exactly what BFS finds — shortest sequence of operations!
+
+
+
+
